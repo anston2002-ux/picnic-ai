@@ -46,9 +46,10 @@ function BookingContent() {
       "picnic_booking",
       JSON.stringify({ name: name.trim(), whatsapp: whatsapp.trim(), date, total: TOTAL, dest })
     );
-    const confirmUrl = dest
-      ? `/confirmation?dest=${encodeURIComponent(dest)}`
-      : "/confirmation";
+    const confirmParams = new URLSearchParams();
+    if (dest) confirmParams.set("dest", dest);
+    confirmParams.set("total", String(TOTAL));
+    const confirmUrl = `/confirmation?${confirmParams.toString()}`;
     router.push(confirmUrl);
   }
 

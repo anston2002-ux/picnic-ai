@@ -2,12 +2,21 @@ import Link from "next/link";
 
 const BRAND = "#EF9F27";
 
+function formatINR(amount: number) {
+  const s = String(amount);
+  const last3 = s.slice(-3);
+  const rest = s.slice(0, -3);
+  return "₹" + (rest ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + last3 : last3);
+}
+
 export default async function ConfirmationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ dest?: string }>;
+  searchParams: Promise<{ dest?: string; total?: string }>;
 }) {
-  const { dest } = await searchParams;
+  const { dest, total: totalParam } = await searchParams;
+  const rawTotal = Number(totalParam);
+  const total = rawTotal > 0 ? rawTotal : 7900;
   const subheading = dest?.trim()
     ? `Your ${dest.trim()} trip is being arranged`
     : "Your trip is being arranged";
@@ -41,7 +50,7 @@ export default async function ConfirmationPage({
 
         {/* Trip summary card */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm px-5 py-4 space-y-1">
-          <p className="font-semibold text-gray-800 text-sm">2 days · 2 people · ₹7,900</p>
+          <p className="font-semibold text-gray-800 text-sm">2 days · 2 people · {formatINR(total)}</p>
           <p className="flex items-center gap-1.5 text-xs font-medium text-green-600">
             <svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 shrink-0">
               <path
