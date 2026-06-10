@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const BRAND = "#EF9F27";
-const TOTAL = 7900;
 
 function formatINR(amount: number) {
   const s = String(amount);
@@ -20,6 +19,8 @@ function BookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dest = searchParams.get("dest") ?? "";
+  const rawTotal = Number(searchParams.get("total"));
+  const total = rawTotal > 0 ? rawTotal : 7900;
 
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -44,11 +45,11 @@ function BookingContent() {
     setSubmitting(true);
     localStorage.setItem(
       "picnic_booking",
-      JSON.stringify({ name: name.trim(), whatsapp: whatsapp.trim(), date, total: TOTAL, dest })
+      JSON.stringify({ name: name.trim(), whatsapp: whatsapp.trim(), date, total, dest })
     );
     const confirmParams = new URLSearchParams();
     if (dest) confirmParams.set("dest", dest);
-    confirmParams.set("total", String(TOTAL));
+    confirmParams.set("total", String(total));
     const confirmUrl = `/confirmation?${confirmParams.toString()}`;
     router.push(confirmUrl);
   }
@@ -87,7 +88,7 @@ function BookingContent() {
             className="text-3xl font-extrabold tracking-tight tabular-nums mt-1"
             style={{ color: BRAND }}
           >
-            {formatINR(TOTAL)}
+            {formatINR(total)}
           </p>
           <p className="mt-1.5 flex items-center gap-1 text-xs font-medium text-green-600">
             <svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5">
@@ -165,7 +166,7 @@ function BookingContent() {
           className="w-full rounded-2xl px-4 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60"
           style={{ backgroundColor: BRAND }}
         >
-          {submitting ? "Confirming…" : `Confirm & pay ${formatINR(TOTAL)} →`}
+          {submitting ? "Confirming…" : `Confirm & pay ${formatINR(total)} →`}
         </button>
       </div>
     </div>
