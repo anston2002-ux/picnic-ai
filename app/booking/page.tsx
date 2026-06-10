@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const BRAND = "#EF9F27";
@@ -16,8 +16,11 @@ function formatINR(amount: number) {
 
 type Field = "name" | "whatsapp" | "date";
 
-export default function BookingPage() {
+function BookingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const dest = searchParams.get("dest") ?? "";
+
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [date, setDate] = useState("");
@@ -41,14 +44,19 @@ export default function BookingPage() {
     setSubmitting(true);
     localStorage.setItem(
       "picnic_booking",
-      JSON.stringify({ name: name.trim(), whatsapp: whatsapp.trim(), date, total: TOTAL })
+      JSON.stringify({ name: name.trim(), whatsapp: whatsapp.trim(), date, total: TOTAL, dest })
     );
-    router.push("/confirmation");
+    const confirmUrl = dest
+      ? `/confirmation?dest=${encodeURIComponent(dest)}`
+      : "/confirmation";
+    router.push(confirmUrl);
   }
 
   function clearError(field: Field) {
     if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }));
   }
+
+  const planLabel = dest ? `Your ${dest} Plan · 2 days` : "Your Plan · 2 days";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -73,7 +81,7 @@ export default function BookingPage() {
       <main className="flex-1 px-4 sm:px-5 pt-6 pb-36 space-y-6">
         {/* Trip summary card */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm px-5 py-5">
-          <p className="text-sm font-semibold text-gray-700">Your Gokarna Plan · 2 days</p>
+          <p className="text-sm font-semibold text-gray-700">{planLabel}</p>
           <p
             className="text-3xl font-extrabold tracking-tight tabular-nums mt-1"
             style={{ color: BRAND }}
@@ -94,7 +102,6 @@ export default function BookingPage() {
 
         {/* Form */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm px-5 py-5 space-y-5">
-          {/* Full name */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-widest text-gray-400">
               Full name
@@ -108,12 +115,9 @@ export default function BookingPage() {
                 errors.name ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50"
               }`}
             />
-            {errors.name && (
-              <p className="text-xs text-red-500">{errors.name}</p>
-            )}
+            {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
           </div>
 
-          {/* WhatsApp */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-widest text-gray-400">
               WhatsApp number
@@ -127,12 +131,9 @@ export default function BookingPage() {
                 errors.whatsapp ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50"
               }`}
             />
-            {errors.whatsapp && (
-              <p className="text-xs text-red-500">{errors.whatsapp}</p>
-            )}
+            {errors.whatsapp && <p className="text-xs text-red-500">{errors.whatsapp}</p>}
           </div>
 
-          {/* Travel date */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-widest text-gray-400">
               When are you going?
@@ -145,13 +146,10 @@ export default function BookingPage() {
                 errors.date ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50"
               }`}
             />
-            {errors.date && (
-              <p className="text-xs text-red-500">{errors.date}</p>
-            )}
+            {errors.date && <p className="text-xs text-red-500">{errors.date}</p>}
           </div>
         </div>
 
-        {/* Trust message */}
         <p className="text-xs text-gray-400 leading-relaxed text-center px-2">
           We&apos;ll confirm your verified bookings on WhatsApp within 2 hours.{" "}
           Nothing is charged until we confirm.
@@ -170,5 +168,22 @@ export default function BookingPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function BookingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div
+            className="h-10 w-10 rounded-full border-4 border-gray-100 animate-spin"
+            style={{ borderTopColor: BRAND }}
+          />
+        </div>
+      }
+    >
+      <BookingContent />
+    </Suspense>
   );
 }

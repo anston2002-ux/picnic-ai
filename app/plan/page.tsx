@@ -274,7 +274,7 @@ function PlanContent() {
       {/* Sticky bottom bar */}
       <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-gray-100 bg-white px-4 py-4">
         <Link
-          href="/booking"
+          href={`/booking?dest=${encodeURIComponent(destination)}`}
           className="flex w-full items-center justify-center rounded-2xl bg-gray-900 px-4 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90 active:opacity-80"
         >
           Book this trip {formatINR(total)} →
