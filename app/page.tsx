@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -36,7 +36,6 @@ export default function IntakePage() {
   const [people, setPeople] = useState(2);
   const [loading, setLoading] = useState(false);
   const [msgIdx, setMsgIdx] = useState(0);
-  const pendingUrl = useRef("");
 
   const toggleVibe = (vibe: string) => {
     setSelectedVibes((prev) => {
@@ -56,9 +55,10 @@ export default function IntakePage() {
       people: String(people),
       vibes: [...selectedVibes].join(","),
     });
-    pendingUrl.current = `/plan?${params.toString()}`;
+    const url = `/plan?${params.toString()}`;
     setMsgIdx(0);
     setLoading(true);
+    setTimeout(() => router.push(url), 2500);
   }
 
   useEffect(() => {
@@ -67,12 +67,8 @@ export default function IntakePage() {
       () => setMsgIdx((i) => (i + 1) % LOADING_MESSAGES.length),
       800
     );
-    const navTimer = setTimeout(() => router.push(pendingUrl.current), 2500);
-    return () => {
-      clearInterval(msgTimer);
-      clearTimeout(navTimer);
-    };
-  }, [loading, router]);
+    return () => clearInterval(msgTimer);
+  }, [loading]);
 
   if (loading) {
     return (
